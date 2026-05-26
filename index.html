@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 24.8.1.2 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="00:00:00"/>
+	<style type="text/css">
+		@page { size: 8.27in 11.69in; margin: 0.79in }
+		p { line-height: 115%; margin-bottom: 0.1in; background: transparent }
+		pre { background: transparent }
+		pre.western { font-family: "Liberation Mono", monospace; font-size: 10pt }
+		pre.cjk { font-family: "NSimSun", monospace; font-size: 10pt }
+		pre.ctl { font-family: "Liberation Mono", monospace; font-size: 10pt }
+	</style>
+</head>
+<body lang="en-US" link="#000080" vlink="#800000" dir="ltr"><pre class="western">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot; /&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;/&gt;
+&lt;title&gt;Operational Incident System&lt;/title&gt;
+&lt;style&gt;
+  * { box-sizing: border-box; font-family: Arial; }
+  body { margin: 0; background: #0f172a; color: white; padding: 20px; }
+  h1 { text-align: center; color: #60a5fa; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .tab-btn {
+    background: #1e293b; color: white; border: none;
+    padding: 12px 18px; border-radius: 10px; cursor: pointer;
+  }
+  .tab-btn.active, .tab-btn:hover { background: #2563eb; }
+
+  .tab {
+    display: none; background: #111827; padding: 25px;
+    border-radius: 16px; border: 1px solid #1f2937;
+  }
+  .tab.active { display: block; }
+
+  /* FIELDS */
+  .field { margin-bottom: 18px; }
+  label { display: block; margin-bottom: 6px; color: #93c5fd; font-weight: bold; }
+  input, textarea, select {
+    width: 100%; padding: 12px; border-radius: 10px;
+    border: 1px solid #374151; background: #0b1220; color: white;
+  }
+  textarea { min-height: 120px; }
+
+  /* BUBBLE SELECT */
+  .bubble-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .bubble {
+    padding: 10px 14px; border-radius: 999px;
+    background: #1e293b; border: 1px solid #334155;
+    cursor: pointer; user-select: none; transition: 0.2s; font-size: 14px;
+  }
+  .bubble.active { background: #2563eb; border-color: #60a5fa; }
+
+  /* BUTTONS */
+  button.generate {
+    margin-top: 20px; padding: 14px; border: none; border-radius: 12px;
+    background: #2563eb; color: white; cursor: pointer; font-size: 16px; width: 100%;
+  }
+  button.generate:hover { background: #1d4ed8; }
+  button.reset {
+    background: #dc2626; border: none; padding: 10px 14px;
+    border-radius: 10px; color: white; cursor: pointer; margin-bottom: 15px;
+  }
+  button.reset:hover { background: #b91c1c; }
+
+  /* RP NAME */
+  button.rp-btn {
+    background: #7c3aed; border: none; padding: 10px 14px;
+    border-radius: 10px; color: white; cursor: pointer; margin-bottom: 15px; margin-left: 8px;
+  }
+  button.rp-btn:hover { background: #6d28d9; }
+
+  /* OUTPUT */
+  .output {
+    margin-top: 20px; background: #020617; border: 1px solid #334155;
+    padding: 20px; border-radius: 14px; white-space: pre-wrap;
+    min-height: 40px; font-size: 14px; line-height: 1.6;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .modal-box {
+    background: #1e293b; padding: 30px; border-radius: 16px;
+    border: 1px solid #334155; min-width: 300px;
+  }
+  .modal-box h2 { margin-top: 0; color: #60a5fa; }
+  .modal-box input { margin-bottom: 16px; }
+  .modal-box button {
+    background: #2563eb; border: none; padding: 10px 20px;
+    border-radius: 10px; color: white; cursor: pointer; font-size: 15px;
+  }
+  .modal-box button:hover { background: #1d4ed8; }
+
+  /* COPY TOAST */
+  #copyToast {
+    position: fixed; bottom: 30px; right: 30px;
+    background: #16a34a; color: white; padding: 12px 20px;
+    border-radius: 10px; font-size: 14px; display: none;
+    z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;h1&gt;Operational Incident System&lt;/h1&gt;
+
+&lt;!-- ROLEPLAY NAME MODAL --&gt;
+&lt;div class=&quot;modal-overlay&quot; id=&quot;roleplayModal&quot;&gt;
+  &lt;div class=&quot;modal-box&quot;&gt;
+    &lt;h2&gt;Set Roleplay Name&lt;/h2&gt;
+    &lt;label&gt;Your Roleplay Name&lt;/label&gt;
+    &lt;input id=&quot;rpNameInput&quot; placeholder=&quot;Enter name...&quot;&gt;
+    &lt;button onclick=&quot;saveRPName()&quot;&gt;Save&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- COPY TOAST --&gt;
+&lt;div id=&quot;copyToast&quot;&gt;✓ Copied to clipboard&lt;/div&gt;
+
+&lt;!-- TABS --&gt;
+&lt;div class=&quot;tabs&quot;&gt;
+  &lt;button class=&quot;tab-btn active&quot; onclick=&quot;openTab('call999', this)&quot;&gt;999 Call&lt;/button&gt;
+  &lt;button class=&quot;tab-btn&quot; onclick=&quot;openTab('fts', this)&quot;&gt;Failure to Stop&lt;/button&gt;
+  &lt;button class=&quot;tab-btn&quot; onclick=&quot;openTab('firearms', this)&quot;&gt;Declared Firearms&lt;/button&gt;
+  &lt;button class=&quot;tab-btn&quot; onclick=&quot;openTab('obs', this)&quot;&gt;Observations&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- ================= 999 ================= --&gt;
+&lt;div id=&quot;call999&quot; class=&quot;tab active&quot;&gt;
+  &lt;button class=&quot;reset&quot; onclick=&quot;reset999()&quot;&gt;RESET PAGE&lt;/button&gt;
+  &lt;button class=&quot;rp-btn&quot; onclick=&quot;openRP()&quot;&gt;Set RP Name&lt;/button&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Call Details&lt;/label&gt;
+    &lt;textarea id=&quot;callDetails&quot;&gt;&lt;/textarea&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Location&lt;/label&gt;
+    &lt;input id=&quot;callLocation&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Caller&lt;/label&gt;
+    &lt;select id=&quot;callerType&quot; onchange=&quot;toggleCaller()&quot;&gt;
+      &lt;option value=&quot;Unknown&quot;&gt;Unknown&lt;/option&gt;
+      &lt;option value=&quot;Other&quot;&gt;Other&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;input id=&quot;callerOther&quot; placeholder=&quot;Enter caller details&quot; style=&quot;display:none; margin-top:10px;&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Threat Level&lt;/label&gt;
+    &lt;select id=&quot;threatLevel&quot;&gt;
+      &lt;option selected&gt;Unknown&lt;/option&gt;
+      &lt;option&gt;Low&lt;/option&gt;
+      &lt;option&gt;Medium&lt;/option&gt;
+      &lt;option&gt;High&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Remarks&lt;/label&gt;
+    &lt;textarea id=&quot;callRemarks&quot;&gt;&lt;/textarea&gt;
+  &lt;/div&gt;
+
+  &lt;button class=&quot;generate&quot; onclick=&quot;generate999()&quot;&gt;Generate + Copy Report&lt;/button&gt;
+  &lt;div class=&quot;output&quot; id=&quot;output999&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- ================= FTS ================= --&gt;
+&lt;div id=&quot;fts&quot; class=&quot;tab&quot;&gt;
+  &lt;button class=&quot;reset&quot; onclick=&quot;resetFTS()&quot;&gt;RESET PAGE&lt;/button&gt;
+  &lt;button class=&quot;rp-btn&quot; onclick=&quot;openRP()&quot;&gt;Set RP Name&lt;/button&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Reporting Officer&lt;/label&gt;
+    &lt;input id=&quot;reportingOfficer&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Vehicle&lt;/label&gt;
+    &lt;input id=&quot;ftsVehicle&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Originating Location&lt;/label&gt;
+    &lt;input id=&quot;ftsLocation&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Vehicle Density&lt;/label&gt;
+    &lt;select id=&quot;vehicleDensity&quot;&gt;
+      &lt;option&gt;Low&lt;/option&gt;&lt;option&gt;Medium&lt;/option&gt;&lt;option&gt;High&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Pedestrian Density&lt;/label&gt;
+    &lt;select id=&quot;pedDensity&quot;&gt;
+      &lt;option&gt;Low&lt;/option&gt;&lt;option&gt;Medium&lt;/option&gt;&lt;option&gt;High&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Visibility&lt;/label&gt;
+    &lt;select id=&quot;visibility&quot;&gt;
+      &lt;option&gt;25%&lt;/option&gt;&lt;option&gt;50%&lt;/option&gt;&lt;option&gt;75%&lt;/option&gt;
+      &lt;option selected&gt;100%&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Road Conditions&lt;/label&gt;
+    &lt;select id=&quot;roadConditions&quot;&gt;
+      &lt;option&gt;Dry&lt;/option&gt;&lt;option&gt;Wet&lt;/option&gt;&lt;option&gt;Dirt&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;DRA Level&lt;/label&gt;
+    &lt;select id=&quot;draLevel&quot;&gt;
+      &lt;option&gt;Low&lt;/option&gt;&lt;option&gt;Medium&lt;/option&gt;&lt;option&gt;High&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Estimated Speeds&lt;/label&gt;
+    &lt;input id=&quot;estimatedSpeeds&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Pursuit Commander Qualifications&lt;/label&gt;
+    &lt;div class=&quot;bubble-group&quot; data-id=&quot;pcQual&quot;&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;IPP&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Advanced&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Tactical Contact&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;TPAC&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Pursuit Commander Vehicle&lt;/label&gt;
+    &lt;select id=&quot;pcVehicle&quot; onchange=&quot;togglePCVehicle()&quot;&gt;
+      &lt;option&gt;Suitable marked police vehicle&lt;/option&gt;
+      &lt;option&gt;Other&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;input id=&quot;pcVehicleOther&quot; placeholder=&quot;Specify vehicle&quot; style=&quot;display:none; margin-top:10px;&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Remarks&lt;/label&gt;
+    &lt;textarea id=&quot;ftsRemarks&quot;&gt;&lt;/textarea&gt;
+  &lt;/div&gt;
+
+  &lt;button class=&quot;generate&quot; onclick=&quot;generateFTS()&quot;&gt;Generate + Copy Report&lt;/button&gt;
+  &lt;div class=&quot;output&quot; id=&quot;outputFTS&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- ================= FIREARMS ================= --&gt;
+&lt;div id=&quot;firearms&quot; class=&quot;tab&quot;&gt;
+  &lt;button class=&quot;reset&quot; onclick=&quot;resetFirearms()&quot;&gt;RESET PAGE&lt;/button&gt;
+  &lt;button class=&quot;rp-btn&quot; onclick=&quot;openRP()&quot;&gt;Set RP Name&lt;/button&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Incident Details&lt;/label&gt;
+    &lt;textarea id=&quot;incidentDetails&quot;&gt;&lt;/textarea&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Location&lt;/label&gt;
+    &lt;input id=&quot;incidentLocation&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Assigned OFC&lt;/label&gt;
+    &lt;input id=&quot;assignedOFC&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Building Tactics&lt;/label&gt;
+    &lt;div class=&quot;bubble-group&quot; data-id=&quot;bt&quot;&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Emergency Search&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Deliberate Search&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Search to Contact&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Contain &amp;amp; Callout&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Vehicle Tactics&lt;/label&gt;
+    &lt;div class=&quot;bubble-group&quot; data-id=&quot;vt&quot;&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Enforced Stop Contain&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Extraction&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Armed Enquiry&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Pedestrian Tactics&lt;/label&gt;
+    &lt;div class=&quot;bubble-group&quot; data-id=&quot;pt&quot;&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Armed Enquiry&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Armed Intervention&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Contain from Cover&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Deployment Type&lt;/label&gt;
+    &lt;div class=&quot;bubble-group&quot; data-id=&quot;dt&quot;&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;RVP Deployment&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;STS Deployment&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;STS Vehicle Locate&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;STS Wait&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Declaration Criteria&lt;/label&gt;
+    &lt;div class=&quot;bubble-group&quot; data-id=&quot;dc&quot;&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Credible threat to life&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Firearm suspected&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Intelligence suggests firearm use&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Risk exceeds routine policing&lt;/div&gt;
+      &lt;div class=&quot;bubble&quot; onclick=&quot;toggleBubble(this)&quot;&gt;Unarmed officers cannot manage risk&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Remarks&lt;/label&gt;
+    &lt;textarea id=&quot;firearmsRemarks&quot;&gt;&lt;/textarea&gt;
+  &lt;/div&gt;
+
+  &lt;button class=&quot;generate&quot; onclick=&quot;generateFirearms()&quot;&gt;Generate + Copy Report&lt;/button&gt;
+  &lt;div class=&quot;output&quot; id=&quot;outputFirearms&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- ================= OBSERVATIONS ================= --&gt;
+&lt;div id=&quot;obs&quot; class=&quot;tab&quot;&gt;
+  &lt;button class=&quot;reset&quot; onclick=&quot;resetObs()&quot;&gt;RESET PAGE&lt;/button&gt;
+  &lt;button class=&quot;rp-btn&quot; onclick=&quot;openRP()&quot;&gt;Set RP Name&lt;/button&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Reporting Officer&lt;/label&gt;
+    &lt;input id=&quot;obsOfficer&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Vehicle / Pedestrian&lt;/label&gt;
+    &lt;input id=&quot;obsType&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Visible Gender&lt;/label&gt;
+    &lt;select id=&quot;obsGender&quot;&gt;
+      &lt;option&gt;Unknown&lt;/option&gt;
+      &lt;option&gt;Male&lt;/option&gt;
+      &lt;option&gt;Female&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;IC Code&lt;/label&gt;
+    &lt;select id=&quot;obsIC&quot;&gt;
+      &lt;option&gt;IC1&lt;/option&gt;&lt;option&gt;IC2&lt;/option&gt;&lt;option&gt;IC3&lt;/option&gt;
+      &lt;option&gt;IC4&lt;/option&gt;&lt;option&gt;IC5&lt;/option&gt;&lt;option&gt;IC6&lt;/option&gt;&lt;option&gt;IC9&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Last Seen&lt;/label&gt;
+    &lt;input id=&quot;obsLastSeen&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Markers&lt;/label&gt;
+    &lt;input id=&quot;obsMarkers&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;field&quot;&gt;
+    &lt;label&gt;Remarks&lt;/label&gt;
+    &lt;textarea id=&quot;obsRemarks&quot;&gt;&lt;/textarea&gt;
+  &lt;/div&gt;
+
+  &lt;button class=&quot;generate&quot; onclick=&quot;generateObs()&quot;&gt;Generate + Copy Report&lt;/button&gt;
+  &lt;div class=&quot;output&quot; id=&quot;outputObs&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+
+  // ── Roleplay name (persisted in localStorage) ──
+  let roleplayName = localStorage.getItem(&quot;rpName&quot;) || &quot;UNKNOWN&quot;;
+
+  function openRP() {
+    document.getElementById(&quot;rpNameInput&quot;).value = roleplayName;
+    document.getElementById(&quot;roleplayModal&quot;).style.display = &quot;flex&quot;;
+  }
+
+  function saveRPName() {
+    const val = document.getElementById(&quot;rpNameInput&quot;).value.trim();
+    roleplayName = val || &quot;UNKNOWN&quot;;
+    localStorage.setItem(&quot;rpName&quot;, roleplayName);
+    document.getElementById(&quot;roleplayModal&quot;).style.display = &quot;none&quot;;
+  }
+
+  // Close modal on overlay click
+  document.getElementById(&quot;roleplayModal&quot;).addEventListener(&quot;click&quot;, function(e) {
+    if (e.target === this) this.style.display = &quot;none&quot;;
+  });
+
+  // ── Tab switching ──
+  function openTab(id, btn) {
+    document.querySelectorAll('.tab').forEach(t =&gt; t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b =&gt; b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Bubble toggles ──
+  function toggleBubble(el) {
+    el.classList.toggle(&quot;active&quot;);
+  }
+
+  function getBubbleValues(id) {
+    return [...document.querySelectorAll(`[data-id=&quot;${id}&quot;] .bubble.active`)]
+      .map(x =&gt; x.innerText).join(&quot;, &quot;);
+  }
+
+  // ── Conditional show/hide ──
+  function toggleCaller() {
+    document.getElementById(&quot;callerOther&quot;).style.display =
+      document.getElementById(&quot;callerType&quot;).value === &quot;Other&quot; ? &quot;block&quot; : &quot;none&quot;;
+  }
+
+  function togglePCVehicle() {
+    document.getElementById(&quot;pcVehicleOther&quot;).style.display =
+      document.getElementById(&quot;pcVehicle&quot;).value === &quot;Other&quot; ? &quot;block&quot; : &quot;none&quot;;
+  }
+
+  // ── 999 ──
+  function generate999() {
+    let caller = document.getElementById(&quot;callerType&quot;).value;
+    if (caller === &quot;Other&quot;) caller = document.getElementById(&quot;callerOther&quot;).value.trim() || &quot;Other&quot;;
+
+    const details  = document.getElementById(&quot;callDetails&quot;).value.trim();
+    const location = document.getElementById(&quot;callLocation&quot;).value.trim();
+
+    const text =
+`999 CALL REPORT
+
+Call Details: ${details || &quot;(none)&quot;}
+
+Location: ${location || &quot;(none)&quot;}
+
+Caller: ${caller}
+Threat Level: ${document.getElementById(&quot;threatLevel&quot;).value}${document.getElementById(&quot;callRemarks&quot;).value.trim() ? `\n\nRemarks: ${document.getElementById(&quot;callRemarks&quot;).value.trim()}` : &quot;&quot;}
+
+CAD generated by ${roleplayName}`;
+
+    document.getElementById(&quot;output999&quot;).innerText = text;
+    copyText(text);
+  }
+
+  // ── FTS ──
+  function generateFTS() {
+    const pcVehicleEl = document.getElementById(&quot;pcVehicle&quot;);
+    const pcVehicleVal = pcVehicleEl.value === &quot;Other&quot;
+      ? document.getElementById(&quot;pcVehicleOther&quot;).value.trim() || &quot;Other&quot;
+      : pcVehicleEl.value;
+
+    const quals = getBubbleValues(&quot;pcQual&quot;);
+
+    const text =
+`FAILURE TO STOP REPORT
+
+Reporting Officer: ${document.getElementById(&quot;reportingOfficer&quot;).value.trim() || &quot;(none)&quot;}
+
+Vehicle: ${document.getElementById(&quot;ftsVehicle&quot;).value.trim() || &quot;(none)&quot;}
+
+Originating Location: ${document.getElementById(&quot;ftsLocation&quot;).value.trim() || &quot;(none)&quot;}
+
+Vehicle Density: ${document.getElementById(&quot;vehicleDensity&quot;).value}
+Pedestrian Density: ${document.getElementById(&quot;pedDensity&quot;).value}
+Visibility: ${document.getElementById(&quot;visibility&quot;).value}
+Road Conditions: ${document.getElementById(&quot;roadConditions&quot;).value}
+
+DRA Level: ${document.getElementById(&quot;draLevel&quot;).value}
+Estimated Speeds: ${document.getElementById(&quot;estimatedSpeeds&quot;).value.trim() || &quot;(none)&quot;}
+
+Qualifications: ${quals || &quot;None selected&quot;}
+
+Pursuit Commander Vehicle: ${pcVehicleVal}${document.getElementById(&quot;ftsRemarks&quot;).value.trim() ? `\n\nRemarks: ${document.getElementById(&quot;ftsRemarks&quot;).value.trim()}` : &quot;&quot;}
+
+CAD generated by ${roleplayName}`;
+
+    document.getElementById(&quot;outputFTS&quot;).innerText = text;
+    copyText(text);
+  }
+
+  // ── FIREARMS ──
+  function generateFirearms() {
+    const sections = [];
+
+    function addSection(title, id) {
+      const val = getBubbleValues(id);
+      if (val) sections.push(`${title}: ${val}`);
+    }
+
+    addSection(&quot;Building Tactics&quot;,    &quot;bt&quot;);
+    addSection(&quot;Vehicle Tactics&quot;,     &quot;vt&quot;);
+    addSection(&quot;Pedestrian Tactics&quot;,  &quot;pt&quot;);
+    addSection(&quot;Deployment&quot;,          &quot;dt&quot;);
+    addSection(&quot;Declaration Criteria&quot;,&quot;dc&quot;);
+
+    const text =
+`DECLARED FIREARMS INCIDENT
+
+Incident Details: ${document.getElementById(&quot;incidentDetails&quot;).value.trim() || &quot;(none)&quot;}
+
+Location: ${document.getElementById(&quot;incidentLocation&quot;).value.trim() || &quot;(none)&quot;}
+
+Assigned OFC: ${document.getElementById(&quot;assignedOFC&quot;).value.trim() || &quot;(none)&quot;}
+
+${sections.length ? sections.join(&quot;\n\n&quot;) : &quot;(No tactics or criteria selected)&quot;}${document.getElementById(&quot;firearmsRemarks&quot;).value.trim() ? `\n\nRemarks: ${document.getElementById(&quot;firearmsRemarks&quot;).value.trim()}` : &quot;&quot;}
+
+This is being declared as a Firearms Incident by ${roleplayName}, the current on-duty Tactical Firearms Commander located within the Brisley Police Headquarters' Control Room.`;
+
+    document.getElementById(&quot;outputFirearms&quot;).innerText = text;
+    copyText(text);
+  }
+
+  // ── OBSERVATIONS ──
+  function generateObs() {
+    const text =
+`OBSERVATIONS REPORT
+
+Reporting Officer: ${document.getElementById(&quot;obsOfficer&quot;).value.trim() || &quot;(none)&quot;}
+Type: ${document.getElementById(&quot;obsType&quot;).value.trim() || &quot;(none)&quot;}
+Visible Gender: ${document.getElementById(&quot;obsGender&quot;).value}
+IC Code: ${document.getElementById(&quot;obsIC&quot;).value}
+
+Last Seen: ${document.getElementById(&quot;obsLastSeen&quot;).value.trim() || &quot;(none)&quot;}
+Markers: ${document.getElementById(&quot;obsMarkers&quot;).value.trim() || &quot;(none)&quot;}
+
+Remarks: ${document.getElementById(&quot;obsRemarks&quot;).value.trim() || &quot;(none)&quot;}
+
+CAD generated by ${roleplayName}`;
+
+    document.getElementById(&quot;outputObs&quot;).innerText = text;
+    copyText(text);
+  }
+
+  // ── RESETS ──
+  function reset999() {
+    document.querySelectorAll(&quot;#call999 input, #call999 textarea&quot;).forEach(x =&gt; x.value = &quot;&quot;);
+    document.querySelectorAll(&quot;#call999 select&quot;).forEach(x =&gt; x.selectedIndex = 0);
+    document.getElementById(&quot;callerOther&quot;).style.display = &quot;none&quot;;
+    document.getElementById(&quot;output999&quot;).innerText = &quot;&quot;;
+  }
+
+  function resetFTS() {
+    document.querySelectorAll(&quot;#fts input, #fts textarea&quot;).forEach(x =&gt; x.value = &quot;&quot;);
+    document.querySelectorAll(&quot;#fts select&quot;).forEach(x =&gt; x.selectedIndex = 0);
+    document.querySelectorAll(&quot;#fts .bubble&quot;).forEach(b =&gt; b.classList.remove(&quot;active&quot;));
+    document.getElementById(&quot;pcVehicleOther&quot;).style.display = &quot;none&quot;;
+    document.getElementById(&quot;outputFTS&quot;).innerText = &quot;&quot;;
+  }
+
+  function resetFirearms() {
+    document.querySelectorAll(&quot;#firearms input, #firearms textarea&quot;).forEach(x =&gt; x.value = &quot;&quot;);
+    document.querySelectorAll(&quot;#firearms .bubble&quot;).forEach(b =&gt; b.classList.remove(&quot;active&quot;));
+    document.getElementById(&quot;outputFirearms&quot;).innerText = &quot;&quot;;
+  }
+
+  function resetObs() {
+    document.querySelectorAll(&quot;#obs input, #obs textarea&quot;).forEach(x =&gt; x.value = &quot;&quot;);
+    document.querySelectorAll(&quot;#obs select&quot;).forEach(x =&gt; x.selectedIndex = 0);
+    document.getElementById(&quot;outputObs&quot;).innerText = &quot;&quot;;
+  }
+
+  // ── CLIPBOARD ──
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      // Fallback for environments without clipboard API
+      const ta = document.createElement(&quot;textarea&quot;);
+      ta.value = text;
+      ta.style.position = &quot;fixed&quot;;
+      ta.style.opacity = &quot;0&quot;;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand(&quot;copy&quot;);
+      document.body.removeChild(ta);
+    }
+    showToast();
+  }
+
+  function showToast() {
+    const toast = document.getElementById(&quot;copyToast&quot;);
+    toast.style.display = &quot;block&quot;;
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() =&gt; { toast.style.display = &quot;none&quot;; }, 2000);
+  }
+
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+</body>
+</html>
